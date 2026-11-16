@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AppDaemon Store</title>
+  <link rel="stylesheet" href="{{ base_path }}/static/style.css">
+  <script src="{{ base_path }}/static/app.js" defer></script>
+</head>
+<body data-base="{{ base_path }}">
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-group">
+        <div class="brand-title-row">
+          <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.3L18.6 8 12 11.7 5.4 8 12 4.3zM5 9.7l6 3.3v6.7l-6-3.3V9.7zm8 10V13l6-3.3v6.7l-6 3.3z" fill="currentColor"/>
+          </svg>
+          <h1>AppDaemon Store</h1>
+          <span id="runtime-badge" class="badge badge-neutral">Loading...</span>
+        </div>
+
+        <div class="meta-strip">
+          <span class="meta-item">
+            <span class="meta-label">Apps dir:</span>
+            <code id="apps-dir-value" class="code-pill">-</code>
+            <span id="config-source-pill" class="badge badge-subtle">-</span>
+            <span id="apps-dir-missing" class="badge badge-warn" hidden>Missing</span>
+          </span>
+          <span class="meta-item">
+            <span class="meta-label">Last checked:</span>
+            <span id="last-checked-value">Never</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button id="theme-toggle-btn" type="button" class="btn btn-secondary" title="Toggle color theme">
+          Theme: Auto
+        </button>
+        <button id="check-updates-btn" type="button" class="btn btn-primary">
+          <span class="spinner" aria-hidden="true" hidden></span>
+          <span class="btn-label">Check for Updates</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="migrations-section" class="card card-alert" hidden>
+      <div class="card-header">
+        <div>
+          <h2>One-Time HACS Migration Assistant</h2>
+          <p class="card-subtitle">
+            Legacy HACS paths, duplicate modules, or unmanaged directories were detected. Review each item before migrating or removing.
+          </p>
+        </div>
+      </div>
+      <div id="migrations-list" class="stack-list"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2>Add Repository</h2>
+          <p class="card-subtitle">
+            Install an AppDaemon app from GitHub using <code>owner/repo</code>, <code>owner/repo@ref</code>, or a GitHub URL.
+          </p>
+        </div>
+      </div>
+
+      <form id="add-repo-form" class="add-repo-form">
+        <div class="form-row">
+          <label class="sr-only" for="repo-input">GitHub repository</label>
+          <input
+            id="repo-input"
+            type="text"
+            class="input"
+            placeholder="owner/repo, owner/repo@v1.2.0, or https://github.com/owner/repo"
+            autocomplete="off"
+            required
+          >
+          <label class="checkbox-label">
+            <input id="add-auto-update" type="checkbox">
+            <span>Auto-update</span>
+          </label>
+          <button id="add-repo-btn" type="submit" class="btn btn-primary">
+            <span class="spinner" aria-hidden="true" hidden></span>
+            <span class="btn-label">Install Repository</span>
+          </button>
+        </div>
+        <p class="help-text">
+          Version resolution order without a pin: latest GitHub Release &rarr; newest Git tag &rarr; default branch commit. Append <code>@tag</code> or <code>@branch</code> to pin on install.
+        </p>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2>Installed Repositories</h2>
+          <p class="card-subtitle">Manage installed AppDaemon repositories, versions, pins, and update checks.</p>
+        </div>
+        <span id="repo-count-badge" class="badge badge-neutral">0</span>
+      </div>
+
+      <div id="repos-empty" class="empty-state">
+        No repositories are currently installed. Add a GitHub repository above to get started.
+      </div>
+      <div id="repos-list" class="stack-list"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2>Python Requirements</h2>
+          <p class="card-subtitle">
+            Packages discovered in installed repositories' <code>requirements.txt</code> files.
+          </p>
+        </div>
+      </div>
+
+      <div id="requirements-empty" class="empty-state">
+        No Python package requirements discovered across installed repositories.
+      </div>
+      <div id="requirements-list" class="chip-list"></div>
+
+      <div id="supervisor-reqs-panel" class="sub-panel" hidden>
+        <div id="supervisor-reqs-status" class="sub-panel-status"></div>
+        <div id="supervisor-reqs-diff" class="reqs-diff"></div>
+        <div class="reqs-actions">
+          <label class="checkbox-label">
+            <input id="sync-restart-checkbox" type="checkbox" checked>
+            <span>Restart AppDaemon after sync</span>
+          </label>
+          <button id="sync-reqs-btn" type="button" class="btn btn-primary">
+            <span class="spinner" aria-hidden="true" hidden></span>
+            <span class="btn-label">Sync to AppDaemon Add-on</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="standalone-reqs-panel" class="sub-panel" hidden>
+        <p class="help-text">
+          Running in Standalone mode. Add these packages to your AppDaemon container's
+          <code>requirements.txt</code> or install them with <code>pip install</code> in your AppDaemon environment.
+        </p>
+        <pre id="standalone-reqs-cmd" class="code-block" hidden></pre>
+      </div>
+    </section>
+  </main>
+
+  <div id="confirm-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="confirm-title" hidden>
+    <div class="modal-card">
+      <h3 id="confirm-title">Confirm Action</h3>
+      <p id="confirm-message" class="modal-message"></p>
+      <div id="confirm-detail" class="modal-detail" hidden></div>
+      <div class="modal-actions">
+        <button id="confirm-cancel-btn" type="button" class="btn btn-secondary">Cancel</button>
+        <button id="confirm-accept-btn" type="button" class="btn btn-danger">Confirm</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

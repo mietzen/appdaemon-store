@@ -1,0 +1,20 @@
+services:
+  appdaemon-store:
+    build: .
+    container_name: appdaemon-store
+    restart: unless-stopped
+    ports:
+      - "8099:8099"
+    volumes:
+      - ./appdaemon/apps:/apps
+      - ./store-data:/data
+    environment:
+      APPDAEMON_STORE_APPS_DIR: /apps
+      APPDAEMON_STORE_STATE_FILE: /data/state.json
+      APPDAEMON_STORE_CHECK_HOURS: "6"
+      APPDAEMON_STORE_AUTO_UPDATE: "false"
+      APPDAEMON_STORE_LOG_LEVEL: info
+      # Optional: GitHub personal access token to increase API rate limits
+      # APPDAEMON_STORE_GITHUB_TOKEN: ghp_your_token_here
+      # Optional: repositories to seed on startup
+      # APPDAEMON_STORE_REPOSITORIES: owner/app-one,owner/app-two@v1.0.0

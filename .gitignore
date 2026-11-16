@@ -1,0 +1,11 @@
+.venv
+.mypy_cache
+.ruff_cache
+.pytest_cache
+site
+local-test.sh
+appdaemon_store.egg-info
+__pycache__
+build
+dist
+.DS_Store
