@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.1.2
+
+* Ensure `[hidden]` elements stay hidden even when combined with flex/inline-flex classes in `style.css`.
+
 ## 0.1.1
 
 * Preserve custom Home Assistant YAML tags (such as `!env_var` and `!secret`) and comments when reading or updating `appdaemon.yaml`.

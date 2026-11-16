@@ -176,6 +176,8 @@ def test_static_assets(tmp_path: Path) -> None:
     assert css_resp.status_code == HTTP_OK
     assert js_resp.status_code == HTTP_OK
     assert "AppDaemon" in css_resp.text or "--ha-primary" in css_resp.text
+    assert "[hidden]" in css_resp.text
+    assert "display: none !important;" in css_resp.text
     assert "document.body.dataset.base" in js_resp.text
 
 
