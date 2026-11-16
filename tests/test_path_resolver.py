@@ -166,3 +166,57 @@ def test_map_legacy_paths(tmp_path: Path) -> None:
 
     assert mapped_ha == cfg_root / "appdaemon" / "apps"
     assert mapped_cfg == cfg_root / "appdaemon" / "apps"
+
+
+def test_yaml_custom_tags(tmp_path: Path) -> None:
+    """Preserve custom YAML tags such as !env_var and !secret on read and write."""
+    yaml_path = tmp_path / "appdaemon.yaml"
+    yaml_path.write_text(
+        "---\n"
+        "# Main AppDaemon config\n"
+        "secrets: /homeassistant/secrets.yaml\n"
+        "appdaemon:\n"
+        "  latitude: 0\n"
+        "  app_dir: /homeassistant/appdaemon/apps  # legacy HACS dir\n"
+        "  plugins:\n"
+        "    HASS:\n"
+        "      type: hass\n"
+        "      token: !env_var SUPERVISOR_TOKEN\n"
+        "    MQTT:\n"
+        "      password: !secret mqtt_pass\n",
+        encoding="utf-8",
+    )
+
+    assert get_app_dir(yaml_path) == "/homeassistant/appdaemon/apps"
+
+    set_app_dir_yaml(yaml_path, "/config/apps")
+    updated_text = yaml_path.read_text(encoding="utf-8")
+
+    assert get_app_dir(yaml_path) == "/config/apps"
+    assert "token: !env_var SUPERVISOR_TOKEN" in updated_text
+    assert "password: !secret mqtt_pass" in updated_text
+    assert "# Main AppDaemon config" in updated_text
+
+
+def test_yaml_insert_and_append(tmp_path: Path) -> None:
+    """Insert app_dir under appdaemon or create section cleanly when missing."""
+    yaml_no_key = tmp_path / "no_key.yaml"
+    yaml_no_key.write_text(
+        "appdaemon:\n"
+        "  latitude: 0\n"
+        "  plugins:\n"
+        "    HASS:\n"
+        "      token: !env_var SUPERVISOR_TOKEN\n",
+        encoding="utf-8",
+    )
+    set_app_dir_yaml(yaml_no_key, "/config/apps")
+    text_no_key = yaml_no_key.read_text(encoding="utf-8")
+    assert get_app_dir(yaml_no_key) == "/config/apps"
+    assert "token: !env_var SUPERVISOR_TOKEN" in text_no_key
+
+    yaml_no_section = tmp_path / "no_section.yaml"
+    yaml_no_section.write_text(
+        "secrets: /homeassistant/secrets.yaml\n", encoding="utf-8"
+    )
+    set_app_dir_yaml(yaml_no_section, "/config/apps")
+    assert get_app_dir(yaml_no_section) == "/config/apps"

@@ -1,7 +1,7 @@
 """Constants and specification values for AppDaemon Store."""
 
 APP_NAME = "appdaemon-store"
-APP_VERSION = "0.1.0"
+APP_VERSION = "0.1.1"
 DEFAULT_PORT = 8099
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_LOG_LEVEL = "info"
