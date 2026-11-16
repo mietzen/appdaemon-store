@@ -42,6 +42,8 @@ Minimum required Python version: 3.12.
 
 ### Home Assistant App (Add-on)
 
+[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fmietzen%2Fhassio-addons)
+
 AppDaemon Store runs as a Home Assistant App with Ingress enabled on port `8099`.
 
 1. Ensure the official AppDaemon add-on (`a0d7b954_appdaemon`) is installed.
