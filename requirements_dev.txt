@@ -7,4 +7,4 @@ pre-commit>=3.6.1
 ruff~=0.15
 mkdocs-material==9.7.1
 mkdocstrings[python]==1.0.2
-pymdown-extensions<11
+pymdown-extensions<14
